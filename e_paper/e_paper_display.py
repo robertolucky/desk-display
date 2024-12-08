@@ -2,25 +2,23 @@
 # -*- coding:utf-8 -*-
 import sys
 import os
-picdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'pic')
 import logging
-import epd7in3f
+from epd7in3f import EPD
 import time
 from PIL import Image,ImageDraw,ImageFont
-import traceback
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 def display_image(image_file=None):
   try:
     logging.info("epd7in3f Demo")
 
-    epd = epd7in3f.EPD()   
+    epd = EPD()   
     logging.info("init and Clear")
     epd.init()
     epd.Clear()
     # If no image file is provided, use the default one
     if image_file is None:
-       image_file = os.path.join(picdir, 'processed_artwork.bmp')
+       image_file ='art_image.bpm'
 
     # read bmp file 
     logging.info("2.read bmp file")

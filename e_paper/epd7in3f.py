@@ -31,7 +31,6 @@
 import logging
 import epdconfig
 
-import PIL
 from PIL import Image
 import io
 
