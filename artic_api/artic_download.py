@@ -1,5 +1,8 @@
 import requests
-file_path='ids_list.txt'
+import os
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+file_path = os.path.join(dir_path, 'ids_list.txt')
 
 def download_image(output_name="art_image"):
 

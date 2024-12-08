@@ -1,5 +1,5 @@
 import datetime
-from calendar_providers.base_provider import BaseCalendarProvider, CalendarEvent
+from calendar_api.base_provider import BaseCalendarProvider, CalendarEvent
 from utility import is_stale
 import os
 import logging
