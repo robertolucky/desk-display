@@ -15,6 +15,7 @@ import locale
 from babel.dates import format_time
 ## Roberto's code
 from PIL import Image, ImageEnhance
+import cairosvg
 
 
 def configure_locale():
@@ -247,3 +248,7 @@ def convert_to_bmp(input_path, output_path, brightness_factor=1.5):
     
     # Save the image in BMP format
     background.save(output_path, format='BMP')
+
+def convert_svg_to_png(svg_file_path, png_file_path):
+    # Convert SVG to BMP using cairosvg
+    cairosvg.svg2png(url=svg_file_path, write_to=png_file_path, output_width=800, output_height=480)

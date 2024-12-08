@@ -80,16 +80,32 @@ def push_event(message="ignore this event"):
 def update_and_return():
     provider = init_calendar()
     calendar_events = provider.get_calendar_events()
-    first_event = calendar_events[0].start
+    
+    # Filter out events that start with "Art of the day"
+    calendar_events = [event for event in calendar_events if not event.summary.startswith("Art of the day")]
+    
+    first_event = calendar_events[0].start if calendar_events else None
     output_dict = get_formatted_calendar_events(calendar_events)
     add_today_date(output_dict)
+    
     # XML escape for safety
     for key, value in output_dict.items():
         output_dict[key] = escape(value)
-
+    
+    # Extract control value if an event starts with "Display code:"
+    control_value = None
+    for event in calendar_events:
+        if event.summary.startswith("Display code:"):
+            try:
+                control_value = int(event.summary.split("Display code:")[1].strip())
+                break  # Assuming only one event contains the control value
+            except ValueError:
+                logging.warning("Invalid control value format in event summary")
+                control_value = None
+    
     logging.info("Updating SVG")
-    update_svg(output_svg_filename, 'output_svg.svg', output_dict)
-    return first_event
+    update_svg(output_svg_filename, 'calendar_screen.svg', output_dict)
+    return first_event, control_value
 
 if __name__ == "__main__":
     print(update_and_return())
