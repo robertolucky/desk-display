@@ -3,8 +3,8 @@ import os.path
 import os
 import logging
 from xml.sax.saxutils import escape
-from base_provider import CalendarEvent
-from google import GoogleCalendar
+from calendar_api.base_provider import CalendarEvent
+from calendar_api.google import GoogleCalendar
 from utility import get_formatted_time, update_svg, configure_logging, get_formatted_date, configure_locale, add_today_date
 
 configure_locale()

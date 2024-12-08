@@ -29,7 +29,7 @@
 #
 
 import logging
-import epdconfig
+from e_paper import epdconfig
 
 from PIL import Image
 import io

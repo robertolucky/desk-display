@@ -3,7 +3,7 @@
 import sys
 import os
 import logging
-from epd7in3f import EPD
+from e_paper.epd7in3f import EPD
 import time
 from PIL import Image,ImageDraw,ImageFont
 
