@@ -4,10 +4,12 @@ from artic_api import artic_download
 from e_paper.e_paper_display import display_image
 from calendar_api import event_manager
 # once per day
-title, artist =artic_download.download_image("art_image")
-convert_to_bmp("artic_apina/art_image.jpg","art_image.bpm")
+#title, artist =artic_download.download_image("art_image")
+convert_to_bmp("art_image.jpg","art_image.bpm")
 display_image("art_image.bpm")
 #event_manager.push_event(f"Title: {title}, artist: {artist}")
+first_event=event_manager.update_and_return()
+print(first_event)
 '''
 # Call the check_event function and get the time of the first event
 first_event_time = check_event()

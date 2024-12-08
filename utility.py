@@ -14,7 +14,7 @@ import humanize
 import locale
 from babel.dates import format_time
 ## Roberto's code
-from PIL import Image
+from PIL import Image, ImageEnhance
 
 
 def configure_locale():
@@ -209,13 +209,19 @@ def get_sunset_time():
 
 ## Roberto's code
 
-def convert_to_bmp(input_path, output_path):
+def convert_to_bmp(input_path, output_path, brightness_factor=1.5):
     """
-    This function takes any jpg image and make it compatible
-    with the e-ink display
+    This function takes any image, increases its brightness,
+    and converts it to a BMP format compatible with the e-ink display.     
+    `brightness_factor` can be adjusted to control the brightness enhancement.
+
     """
     # Open the image
     img = Image.open(input_path)
+    
+    # Enhance the brightness of the image
+    enhancer = ImageEnhance.Brightness(img)
+    img = enhancer.enhance(brightness_factor)  # Increase the brightness
     
     # Create a new black background image
     background = Image.new('RGB', (800, 480), 'black')
