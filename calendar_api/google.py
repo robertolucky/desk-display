@@ -62,7 +62,7 @@ class GoogleCalendar(BaseCalendarProvider):
             # Call the Calendar API
             events_result = service.events().list(
                 calendarId=self.google_calendar_id,
-                timeMin=self.from_date.isoformat(),
+                timeMin=self.from_date.isoformat() + 'Z',
                 timeZone=google_calendar_timezone,
                 maxResults=self.max_event_results,
                 singleEvents=True,
