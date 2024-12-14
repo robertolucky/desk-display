@@ -13,7 +13,7 @@ configure_logging()
 # note: increasing this will require updates to the SVG template to accommodate more events
 max_event_results = int(os.getenv("MAX_EVENT_RESULTS", 3))
 google_calendar_id = os.getenv("GOOGLE_CALENDAR_ID", "primary")
-ttl = float(os.getenv("CALENDAR_TTL", 1 * 60 * 60))
+ttl = float(os.getenv("CALENDAR_TTL", 300))
 fake_event_h=int(os.getenv("FAKE_EVENT_H",8))
 output_svg_filename = str(os.getenv("CALENDAR_TEMPLATE", 'screen-temp-rob.svg'))
 

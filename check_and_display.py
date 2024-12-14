@@ -74,12 +74,12 @@ if __name__ == "__main__":
 
     if first_event:  # Ensure first_event is not None or empty
         # Calculate the time difference in minutes
-        time_difference = (first_event - datetime.now(timezone.utc)).total_seconds() / 60.0
+        time_difference = (first_event - datetime.now(timezone.utc)).total_seconds() / 60.0 - 60.0
 
         # Check if the current time is within 10 minutes before or 5 minutes after the event
         if -10 <= time_difference <= 5:
             set_flag("time_for_meeting", True)
         else:
             set_flag("time_for_meeting", False)
-            
+
     display()

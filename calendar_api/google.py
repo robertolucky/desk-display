@@ -10,7 +10,7 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
 ttl = float(os.getenv("CALENDAR_TTL", 1 * 60 * 60))
-google_calendar_timezone = os.getenv("GOOGLE_CALENDAR_TIME_ZONE_NAME", None)
+google_calendar_timezone = os.getenv("GOOGLE_CALENDAR_TIME_ZONE_NAME", 'Europe/Brussels')
 
 
 class GoogleCalendar(BaseCalendarProvider):
@@ -62,7 +62,7 @@ class GoogleCalendar(BaseCalendarProvider):
             # Call the Calendar API
             events_result = service.events().list(
                 calendarId=self.google_calendar_id,
-                timeMin=self.from_date.isoformat() + 'Z',
+                timeMin=self.from_date.isoformat(),
                 timeZone=google_calendar_timezone,
                 maxResults=self.max_event_results,
                 singleEvents=True,
