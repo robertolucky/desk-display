@@ -62,7 +62,9 @@ def get_datetime_formatted(event_start, event_end, is_all_day_event, start_only=
 
 def init_calendar():
     today_start_time = (datetime.datetime.now()
-                        - datetime.timedelta(minutes=30))
+                        - datetime.timedelta(days=3))
+    today_start_time = datetime.datetime.combine(datetime.datetime.utcnow(), datetime.datetime.min.time())
+
     oneweeklater_iso = (datetime.datetime.now()
                         + datetime.timedelta(days=7))
 
