@@ -4,6 +4,7 @@ import typing
 from typing import NamedTuple
 
 class CalendarEvent(NamedTuple):
+    event_id: str
     summary: str
     start: any
     end: any

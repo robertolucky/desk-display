@@ -83,8 +83,9 @@ class GoogleCalendar(BaseCalendarProvider):
                     end_date = datetime.datetime.strptime(event['end'].get('dateTime'), "%Y-%m-%dT%H:%M:%S%z")
 
                 summary = event['summary']
+                event_id = event['id']  # Get the event ID from the event dictionary
 
-                calendar_events.append(CalendarEvent(summary, start_date, end_date, is_all_day))
+            calendar_events.append(CalendarEvent(event_id, summary, start_date, end_date, is_all_day))
 
             with open(google_calendar_pickle, 'wb') as cal:
                 pickle.dump(calendar_events, cal)
@@ -126,6 +127,34 @@ class GoogleCalendar(BaseCalendarProvider):
 
         event = service.events().insert(calendarId=self.google_calendar_id, body=event).execute()
         print(f"Event created: {event.get('htmlLink')}")
+    
+    def delete_event(self, event_id: str):
+        service = build('calendar', 'v3', credentials=self.get_google_credentials(), cache_discovery=False)
+        try:
+            service.events().delete(calendarId=self.google_calendar_id, eventId=event_id).execute()
+            logging.info(f"Event with ID {event_id} has been deleted.")
+        except Exception as e:
+            logging.error(f"An error occurred: {e}")
+            raise
+
+    def delete_event_by_summary(self, summary_prefix: str):
+        try:
+            # Use the existing method to get all events
+            all_events = self.get_calendar_events()
+            # Filter events based on the summary prefix
+            events_to_delete = [event for event in all_events if event.summary.startswith(summary_prefix)]
+
+            # Delete all events that match the summary prefix
+            for event in events_to_delete:
+                self.delete_event(event.event_id)  # Use the event_id attribute to delete the event
+                logging.info(f"Event with ID {event.event_id} and summary starting '{summary_prefix}' deleted.")
+
+            if not events_to_delete:
+                logging.info(f"No event with summary starting '{summary_prefix}' found.")
+        except Exception as e:
+            logging.error(f"An error occurred while trying to delete the event: {e}")
+            raise
+
 
 # Example usage:
 # google_calendar = GoogleCalendar('<your_calendar_id>', 10, datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(days=1))

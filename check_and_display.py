@@ -1,6 +1,6 @@
 import os
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from utility import convert_to_bmp, convert_svg_to_png
 from artic_api import artic_download
 from e_paper.e_paper_display import display_image
@@ -58,7 +58,7 @@ def display():
         display_image(calendar_path_png)
         set_flag("art_in_show", False)
 
-    elif not get_flag("art_in_show") and not get_flag("time_for_meeting"):
+    elif (not get_flag("art_in_show")) and (not get_flag("time_for_meeting")):
         display_image(art_image_path_bpm)
         set_flag("art_in_show", True)
 
@@ -74,11 +74,12 @@ if __name__ == "__main__":
 
     if first_event:  # Ensure first_event is not None or empty
         # Calculate the time difference in minutes
-        time_difference = (first_event - datetime.now()).total_seconds() / 60.0
+        time_difference = (first_event - datetime.now(timezone.utc)).total_seconds() / 60.0
 
         # Check if the current time is within 10 minutes before or 5 minutes after the event
         if -10 <= time_difference <= 5:
             set_flag("time_for_meeting", True)
         else:
             set_flag("time_for_meeting", False)
-
+            
+    display()
