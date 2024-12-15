@@ -5,6 +5,8 @@ from utility import convert_to_bmp, convert_svg_to_png
 from artic_api import artic_download
 from e_paper.e_paper_display import display_image
 from calendar_api import event_manager
+import logging
+
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 art_image_path_jpg = os.path.join(dir_path, 'art_image.jpg')
@@ -37,15 +39,18 @@ def reset_flag_daily():
         last_modified_time = os.path.getmtime(art_image_path_jpg)
         last_modified_date = datetime.fromtimestamp(last_modified_time).date()
         current_date = datetime.now().date()
+
         # If the image is from yesterday or older, reset the flag
         if last_modified_date < current_date:
             set_flag("image_downloaded", False)
+
 
 def download_image_if_needed():
     # Check if the image has already been downloaded today
     if get_flag("image_downloaded"):
         return False  # Image has been downloaded, do nothing
-
+    
+    logging.info("Image date is old, finding a new one..")
     # Download the image
     title, artist = artic_download.download_image("art_image")
     convert_to_bmp(art_image_path_jpg,art_image_path_bpm)
@@ -62,6 +67,8 @@ def display():
     elif (not get_flag("art_in_show")) and (not get_flag("time_for_meeting")):
         display_image(art_image_path_bpm)
         set_flag("art_in_show", True)
+    else:
+        logging.info("Nothing to display")
 
 if __name__ == "__main__":
     reset_flag_daily()
@@ -69,7 +76,7 @@ if __name__ == "__main__":
 
     first_event,control_code=event_manager.update_and_return()
     convert_svg_to_png(calendar_path_svg, calendar_path_png)
-
+    
     if control_code==1:
         set_flag("image_downloaded", False)
 

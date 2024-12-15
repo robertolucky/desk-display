@@ -4,7 +4,7 @@ import os
 import logging
 from xml.sax.saxutils import escape
 from calendar_api.base_provider import CalendarEvent
-from calendar_api.google import GoogleCalendar
+from calendar_api.google import GoogleCalendar 
 from utility import get_formatted_time, update_svg, configure_logging, get_formatted_date, configure_locale, add_today_date
 
 configure_locale()
@@ -102,6 +102,8 @@ def update_and_return():
         if event.summary.startswith("Display code:"):
             try:
                 control_value = int(event.summary.split("Display code:")[1].strip())
+                logging.info(f"Found a control code:{control_value}")
+                provider.delete_event_by_summary("Display code")
                 break  # Assuming only one event contains the control value
             except ValueError:
                 logging.warning("Invalid control value format in event summary")
