@@ -15,7 +15,9 @@ max_event_results = int(os.getenv("MAX_EVENT_RESULTS", 3))
 google_calendar_id = os.getenv("GOOGLE_CALENDAR_ID", "primary")
 ttl = float(os.getenv("CALENDAR_TTL", 300))
 fake_event_h=int(os.getenv("FAKE_EVENT_H",8))
-output_svg_filename = str(os.getenv("CALENDAR_TEMPLATE", 'screen-temp-rob.svg'))
+dir_path = os.path.dirname(os.path.realpath(__file__))
+template_svg_filename = os.path.join(dir_path, '../screen-temp-rob.svg')
+output_svg_filename = os.path.join(dir_path, '../calendar_screen.svg')
 
 def get_formatted_calendar_events(fetched_events: list[CalendarEvent]) -> dict:
     formatted_events = {}
@@ -106,7 +108,7 @@ def update_and_return():
                 control_value = None
     
     logging.info("Updating SVG")
-    update_svg(output_svg_filename, 'calendar_screen.svg', output_dict)
+    update_svg(template_svg_filename, output_svg_filename, output_dict)
     return first_event, control_value
 
 if __name__ == "__main__":
