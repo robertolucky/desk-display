@@ -43,6 +43,8 @@ def reset_flag_daily():
         # If the image is from yesterday or older, reset the flag
         if last_modified_date < current_date:
             set_flag("image_downloaded", False)
+            logging.info("Image date is old, finding a new one..")
+
 
 
 def download_image_if_needed():
@@ -50,7 +52,6 @@ def download_image_if_needed():
     if get_flag("image_downloaded"):
         return False  # Image has been downloaded, do nothing
     
-    logging.info("Image date is old, finding a new one..")
     # Download the image
     title, artist = artic_download.download_image("art_image")
     convert_to_bmp(art_image_path_jpg,art_image_path_bpm)

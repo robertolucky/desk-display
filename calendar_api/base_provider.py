@@ -9,7 +9,7 @@ class CalendarEvent(NamedTuple):
     start: any
     end: any
     all_day_event: bool
-
+    event_organizer: str
 
 class BaseCalendarProvider(ABC):
 

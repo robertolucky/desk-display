@@ -83,8 +83,8 @@ class GoogleCalendar(BaseCalendarProvider):
 
                 summary = event['summary']
                 event_id = event['id']  # Get the event ID from the event dictionary
-
-            calendar_events.append(CalendarEvent(event_id, summary, start_date, end_date, is_all_day))
+                event_organizer = event['creator']['email']
+                calendar_events.append(CalendarEvent(event_id, summary, start_date, end_date, is_all_day, event_organizer))
 
             with open(google_calendar_pickle, 'wb') as cal:
                 pickle.dump(calendar_events, cal)
