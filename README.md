@@ -3,6 +3,10 @@
 This project is inspired by the desire to have a small, yet aesthetically pleasing display on the desk that not only provides useful information about upcoming events but also serves as a piece of art. The display is designed to show a work of art when it is not being used to display information.
 
 For the integration with Google Calendar, we have repurposed functions from an existing project. 
+
+To ensure that the `check_and_display.py` script runs every 2 minutes, add the following line to your crontab:
+*/2 * * * * /usr/bin/python3 /path/to/check_and_display.py
+
 ---
 
 ## Original Project Information

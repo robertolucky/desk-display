@@ -225,7 +225,7 @@ def convert_to_bmp(input_path, output_path, brightness_factor=1.5):
     img = enhancer.enhance(brightness_factor)  # Increase the brightness
     
     # Create a new black background image
-    background = Image.new('RGB', (800, 480), 'black')
+    background = Image.new('RGB', (800, 480), 'white')
     
     # Calculate new size maintaining aspect ratio
     target_width = 800
