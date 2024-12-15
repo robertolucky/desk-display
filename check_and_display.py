@@ -13,6 +13,8 @@ art_image_path_jpg = os.path.join(dir_path, 'art_image.jpg')
 art_image_path_bpm = os.path.join(dir_path, 'art_image.bpm')
 calendar_path_svg = os.path.join(dir_path, 'calendar_screen.svg')
 calendar_path_png = os.path.join(dir_path, 'calendar_screen.png')
+personal_pic_jpg = os.path.join(dir_path, 'me_and_fra.jpg')
+personal_pic_bmp = os.path.join(dir_path, 'me_and_fra.bpm')
 FLAGS_FILE_PATH = os.path.join(dir_path, 'flags.json')
 
 def get_flag(flag_name):
@@ -80,7 +82,11 @@ if __name__ == "__main__":
     
     if control_code==1:
         set_flag("image_downloaded", False)
+        set_flag("art_in_show",False)
 
+    if control_code==2:
+        convert_to_bmp(personal_pic_jpg,personal_pic_bmp)
+        display_image(personal_pic_bmp)
     if first_event:  # Ensure first_event is not None or empty
         # Calculate the time difference in minutes
         time_difference = (first_event - datetime.now(timezone.utc)).total_seconds() / 60.0
@@ -88,7 +94,7 @@ if __name__ == "__main__":
         #print(time_difference)
 
         # Check if the current time is within 10 minutes before or 5 minutes after the event
-        if -10 <= time_difference <= 5:
+        if -5 <= time_difference <= 15:
             set_flag("time_for_meeting", True)
         else:
             set_flag("time_for_meeting", False)
