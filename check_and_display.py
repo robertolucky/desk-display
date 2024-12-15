@@ -50,6 +50,7 @@ def download_image_if_needed():
     title, artist = artic_download.download_image("art_image")
     convert_to_bmp(art_image_path_jpg,art_image_path_bpm)
     set_flag("image_downloaded", True)
+    set_flag("art_in_show", False)
     event_manager.push_event(f"Art of the day - Title: {title}, artist: {artist}")
     return True
 

@@ -11,7 +11,10 @@ from googleapiclient.discovery import build
 
 ttl = float(os.getenv("CALENDAR_TTL", 1 * 60 * 60))
 google_calendar_timezone = os.getenv("GOOGLE_CALENDAR_TIME_ZONE_NAME", 'Europe/Brussels')
-
+dir_path = os.path.dirname(os.path.realpath(__file__))
+google_credentials_json = os.path.join(dir_path, 'credentials.json')
+google_token_pickle = os.path.join(dir_path, 'token.pickle')
+google_calendar_pickle =  os.path.join(dir_path,'cache_calendar.pickle')
 
 class GoogleCalendar(BaseCalendarProvider):
     def __init__(self, google_calendar_id, max_event_results, from_date, to_date):
@@ -21,9 +24,6 @@ class GoogleCalendar(BaseCalendarProvider):
         self.google_calendar_id = google_calendar_id
 
     def get_google_credentials(self):
-
-        google_token_pickle = 'token.pickle'
-        google_credentials_json = 'credentials.json'
         google_api_scopes = ['https://www.googleapis.com/auth/calendar']#.readonly']
 
         credentials = None
@@ -50,7 +50,6 @@ class GoogleCalendar(BaseCalendarProvider):
 
     def get_calendar_events(self) -> list[CalendarEvent]:
         calendar_events = []
-        google_calendar_pickle = 'cache_calendar.pickle'
 
         service = build('calendar', 'v3', credentials=self.get_google_credentials(), cache_discovery=False)
 
