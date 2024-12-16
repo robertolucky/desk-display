@@ -58,7 +58,7 @@ def download_image_if_needed():
         return False  # Image has been downloaded, do nothing
     
     # Download the image
-    title, artist = artic_download.download_image("art_image")
+    title, artist = artic_download.download_image()
     convert_to_bmp(art_image_path_jpg,art_image_path_bpm)
     set_flag("image_downloaded", True)
     set_flag("art_in_show", False)
