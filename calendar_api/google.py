@@ -9,8 +9,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
-ttl = float(os.getenv("CALENDAR_TTL", 1 * 60 * 60))
-google_calendar_timezone = os.getenv("GOOGLE_CALENDAR_TIME_ZONE_NAME", 'Europe/Brussels')
+ttl = 300
+google_calendar_timezone = 'Europe/Brussels'
 dir_path = os.path.dirname(os.path.realpath(__file__))
 google_credentials_json = os.path.join(dir_path, 'credentials.json')
 google_token_pickle = os.path.join(dir_path, 'token.pickle')

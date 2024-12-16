@@ -11,10 +11,10 @@ configure_locale()
 configure_logging()
 
 # note: increasing this will require updates to the SVG template to accommodate more events
-max_event_results = int(os.getenv("MAX_EVENT_RESULTS", 3))
-google_calendar_id = os.getenv("GOOGLE_CALENDAR_ID", "primary")
-ttl = float(os.getenv("CALENDAR_TTL", 300))
-fake_event_h=int(os.getenv("FAKE_EVENT_H",8))
+max_event_results =  3
+google_calendar_id = "robertolacom.rlc@gmail.com"
+ttl = 300
+fake_event_h=8
 dir_path = os.path.dirname(os.path.realpath(__file__))
 template_svg_filename = os.path.join(dir_path, 'screen-temp-rob.svg')
 output_svg_filename = os.path.join(dir_path, 'calendar_screen.svg')
