@@ -3,7 +3,7 @@ import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 file_path = os.path.join(dir_path, 'ids_list.txt')
-art_image_path = os.path.join(dir_path, '../art_image.jpg')
+art_image_path = os.path.join(dir_path, 'art_image.jpg')
 def download_image():
 
     with open(file_path, 'r') as file:
