@@ -3,8 +3,8 @@ import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 file_path = os.path.join(dir_path, 'ids_list.txt')
-
-def download_image(output_name="art_image"):
+art_image_path = os.path.join(dir_path, '../art_image.jpg')
+def download_image():
 
     with open(file_path, 'r') as file:
         # Read all lines from the file
@@ -58,7 +58,7 @@ def download_image(output_name="art_image"):
 
         if response2.status_code == 200:
             # Save the image locally
-            with open(f"{output_name}.jpg", "wb") as file:
+            with open(art_image_path, "wb") as file:
                 file.write(response2.content)
             print("Image downloaded successfully.")
         return title, artist_title
