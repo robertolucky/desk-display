@@ -16,8 +16,8 @@ google_calendar_id = os.getenv("GOOGLE_CALENDAR_ID", "primary")
 ttl = float(os.getenv("CALENDAR_TTL", 300))
 fake_event_h=int(os.getenv("FAKE_EVENT_H",8))
 dir_path = os.path.dirname(os.path.realpath(__file__))
-template_svg_filename = os.path.join(dir_path, '../screen-temp-rob.svg')
-output_svg_filename = os.path.join(dir_path, '../calendar_screen.svg')
+template_svg_filename = os.path.join(dir_path, 'screen-temp-rob.svg')
+output_svg_filename = os.path.join(dir_path, 'calendar_screen.svg')
 
 def get_formatted_calendar_events(fetched_events: list[CalendarEvent]) -> dict:
     formatted_events = {}
