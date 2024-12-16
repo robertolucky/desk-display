@@ -46,7 +46,9 @@ def reset_flag_daily():
         if last_modified_date < current_date:
             set_flag("image_downloaded", False)
             logging.info("Image date is old, finding a new one..")
-    else
+    else:
+        set_flag("image_downloaded", False)
+
 
 
 
