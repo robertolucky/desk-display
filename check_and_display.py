@@ -1,5 +1,7 @@
 import os
 import json
+import random
+
 from datetime import datetime, timedelta, timezone
 from utility import convert_to_bmp, convert_svg_to_png
 from artic_api import artic_download
@@ -13,8 +15,8 @@ art_image_path_jpg = os.path.join(dir_path, 'artic_api/art_image.jpg')
 art_image_path_bpm = os.path.join(dir_path, 'artic_api/art_image.bpm')
 calendar_path_svg = os.path.join(dir_path, 'calendar_api/calendar_screen.svg')
 calendar_path_png = os.path.join(dir_path, 'calendar_api/calendar_screen.png')
-personal_pic_jpg = os.path.join(dir_path, 'me_and_fra.jpg')
-personal_pic_bmp = os.path.join(dir_path, 'me_and_fra.bpm')
+personal_pic_jpg = os.path.join(dir_path, 'personal_photos/me_and_fra.jpg')
+personal_pic_bmp = os.path.join(dir_path, 'personal_photos/me_and_fra.bpm')
 FLAGS_FILE_PATH = os.path.join(dir_path, 'flags.json')
 
 def get_flag(flag_name):
@@ -88,8 +90,21 @@ if __name__ == "__main__":
         set_flag("art_in_show",False)
 
     if control_code==2:
-        convert_to_bmp(personal_pic_jpg,personal_pic_bmp)
-        display_image(personal_pic_bmp)
+        # List all files in the 'personal_photos' directory
+        personal_photos = os.listdir(os.path.join(dir_path, 'personal_photos'))
+        # Filter for image files, assuming they are .jpg or .bmp
+        image_files = [file for file in personal_photos if file.endswith(('.jpg', '.bmp'))]
+        # Choose a random image file
+        random_image = random.choice(image_files)
+        # Create the full path for the randomly selected image
+        random_image_path = os.path.join(dir_path, 'personal_photos', random_image)
+        # Convert to bmp if necessary (assuming all images need to be in .bmp format for display)
+        random_image_bmp_path = os.path.join(dir_path, 'personal_photos/photo.bmp')
+        convert_to_bmp(random_image_path, random_image_bmp_path)
+        # Display the random image
+        display_image(random_image_bmp_path)
+        set_flag("art_in_show",True)
+
     if first_event:  # Ensure first_event is not None or empty
         # Calculate the time difference in minutes
         time_difference = (first_event - datetime.now(timezone.utc)).total_seconds() / 60.0
