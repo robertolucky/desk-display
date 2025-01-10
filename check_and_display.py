@@ -100,13 +100,14 @@ if __name__ == "__main__":
         random_image_path = os.path.join(dir_path, 'personal_photos', random_image)
         # Convert to bmp if necessary (assuming all images need to be in .bmp format for display)
         random_image_bmp_path = os.path.join(dir_path, 'personal_photos/photo.bmp')
-        convert_to_bmp(random_image_path, random_image_bmp_path)
+        convert_to_bmp(random_image_path, random_image_bmp_path,1)
         # Display the random image
         display_image(random_image_bmp_path)
         set_flag("art_in_show",True)
 
     if first_event:  # Ensure first_event is not None or empty
         # Calculate the time difference in minutes
+        first_event = first_event.replace(tzinfo=timezone.utc)
         time_difference = (first_event - datetime.now(timezone.utc)).total_seconds() / 60.0
         #print(f" First event time: {first_event},  date now = {datetime.now(timezone.utc)}")
         #print(time_difference)
