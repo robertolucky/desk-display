@@ -19,16 +19,20 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 template_svg_filename = os.path.join(dir_path, 'screen-temp-rob.svg')
 output_svg_filename = os.path.join(dir_path, 'calendar_screen.svg')
 
-def get_formatted_calendar_events(fetched_events: list[CalendarEvent]) -> dict:
+def get_formatted_calendar_events(fetched_events: list[CalendarEvent], skip_all_day_events: bool = True) -> dict:
     formatted_events = {}
     event_count = len(fetched_events)
 
     for index in range(max_event_results):
         event_label_id = str(index + 1)
+        event = fetched_events[index]
+        # Skip all-day events if skip_all_day_events is True
+        if skip_all_day_events and event.all_day_event:
+            continue
         if index <= event_count - 1:
-            formatted_events['CAL_DATETIME_' + event_label_id] = get_datetime_formatted(fetched_events[index].start, fetched_events[index].end, fetched_events[index].all_day_event)
-            formatted_events['CAL_DATETIME_START_' + event_label_id] = get_datetime_formatted(fetched_events[index].start, fetched_events[index].end, fetched_events[index].all_day_event, True)
-            formatted_events['CAL_DESC_' + event_label_id] = fetched_events[index].summary
+            formatted_events['CAL_DATETIME_' + event_label_id] = get_datetime_formatted(event.start, event.end, event.all_day_event)
+            formatted_events['CAL_DATETIME_START_' + event_label_id] = get_datetime_formatted(event.start, event.end, event.all_day_event, True)
+            formatted_events['CAL_DESC_' + event_label_id] = event.summary
         else:
             formatted_events['CAL_DATETIME_' + event_label_id] = ""
             formatted_events['CAL_DESC_' + event_label_id] = ""
@@ -85,8 +89,12 @@ def update_and_return():
     
     # Filter out events that start with "Art of the day"
     calendar_events = [event for event in calendar_events if not event.summary.startswith("Art of the day")]
+     # Filter out all-day events
+    non_all_day_events = [event for event in calendar_events if not event.all_day_event]
     
-    first_event = calendar_events[0].start if calendar_events else None
+    # Get the start of the first non-all-day event, if there is one
+    first_event = non_all_day_events[0].start if non_all_day_events else None
+
     output_dict = get_formatted_calendar_events(calendar_events)
     add_today_date(output_dict)
     
