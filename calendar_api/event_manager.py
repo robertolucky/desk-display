@@ -11,7 +11,7 @@ configure_locale()
 configure_logging()
 
 # note: increasing this will require updates to the SVG template to accommodate more events
-max_event_results =  3
+max_event_results =  5
 google_calendar_id = "robertolacom.rlc@gmail.com"
 google_calendar_id = "roberto.lacommare@pickit3d.com"
 ttl = 300
@@ -22,21 +22,27 @@ output_svg_filename = os.path.join(dir_path, 'calendar_screen.svg')
 
 def get_formatted_calendar_events(fetched_events: list[CalendarEvent], skip_all_day_events: bool = True) -> dict:
     formatted_events = {}
-    event_count = len(fetched_events)
+    event_index = 0  # Index to iterate over fetched_events
+    formatted_event_count = 0  # Counter for the number of events formatted
 
-    for index in range(max_event_results):
-        event_label_id = str(index + 1)
-        event = fetched_events[index]
-        # Skip all-day events if skip_all_day_events is True
+    while formatted_event_count < max_event_results and event_index < len(fetched_events):
+        event = fetched_events[event_index]
+        event_index += 1
+
         if skip_all_day_events and event.all_day_event:
             continue
-        if index <= event_count - 1:
-            formatted_events['CAL_DATETIME_' + event_label_id] = get_datetime_formatted(event.start, event.end, event.all_day_event)
-            formatted_events['CAL_DATETIME_START_' + event_label_id] = get_datetime_formatted(event.start, event.end, event.all_day_event, True)
-            formatted_events['CAL_DESC_' + event_label_id] = event.summary
-        else:
-            formatted_events['CAL_DATETIME_' + event_label_id] = ""
-            formatted_events['CAL_DESC_' + event_label_id] = ""
+
+        formatted_event_count += 1
+        event_label_id = str(formatted_event_count)
+        formatted_events['CAL_DATETIME_' + event_label_id] = get_datetime_formatted(event.start, event.end, event.all_day_event)
+        formatted_events['CAL_DATETIME_START_' + event_label_id] = get_datetime_formatted(event.start, event.end, event.all_day_event, True)
+        formatted_events['CAL_DESC_' + event_label_id] = event.summary
+
+    # Fill in the remaining slots with empty strings if there are fewer events than max_event_results
+    for index in range(formatted_event_count, max_event_results):
+        event_label_id = str(index + 1)
+        formatted_events['CAL_DATETIME_' + event_label_id] = ""
+        formatted_events['CAL_DESC_' + event_label_id] = ""
 
     return formatted_events
 
