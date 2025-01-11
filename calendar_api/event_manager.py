@@ -13,6 +13,7 @@ configure_logging()
 # note: increasing this will require updates to the SVG template to accommodate more events
 max_event_results =  3
 google_calendar_id = "robertolacom.rlc@gmail.com"
+google_calendar_id = "roberto.lacommare@pickit3d.com"
 ttl = 300
 fake_event_h=8
 dir_path = os.path.dirname(os.path.realpath(__file__))
