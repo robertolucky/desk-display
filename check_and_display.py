@@ -1,6 +1,7 @@
 import os
 import json
 import random
+import pytz
 
 from datetime import datetime, timedelta, timezone
 from utility import convert_to_bmp, convert_svg_to_png
@@ -18,6 +19,7 @@ calendar_path_png = os.path.join(dir_path, 'calendar_api/calendar_screen.png')
 personal_pic_jpg = os.path.join(dir_path, 'personal_photos/me_and_fra.jpg')
 personal_pic_bmp = os.path.join(dir_path, 'personal_photos/me_and_fra.bpm')
 FLAGS_FILE_PATH = os.path.join(dir_path, 'flags.json')
+BRUSSELS_TIMEZONE = pytz.timezone('Europe/Brussels')
 
 def get_flag(flag_name):
     if os.path.exists(FLAGS_FILE_PATH):
@@ -104,13 +106,16 @@ if __name__ == "__main__":
         # Display the random image
         display_image(random_image_bmp_path)
         set_flag("art_in_show",True)
+    
 
     if first_event:  # Ensure first_event is not None or empty
+        # Convert first_event to Brussels timezone before the comparison
+        first_event = BRUSSELS_TIMEZONE.localize(first_event) if first_event.tzinfo is None else first_event.astimezone(BRUSSELS_TIMEZONE)
+        # Also convert the current time to Brussels timezone
+        current_time_brussels = datetime.now(timezone.utc).astimezone(BRUSSELS_TIMEZONE)
         # Calculate the time difference in minutes
-        first_event = first_event.replace(tzinfo=timezone.utc)
-        time_difference = (first_event - datetime.now(timezone.utc)).total_seconds() / 60.0
-        #print(f" First event time: {first_event},  date now = {datetime.now(timezone.utc)}")
-        #print(time_difference)
+        time_difference = (first_event - current_time_brussels).total_seconds() / 60.0
+        logging.info(f"Next event in {time_difference}")
 
         # Check if the current time is within 10 minutes before or 5 minutes after the event
         if -5 <= time_difference <= 15:
