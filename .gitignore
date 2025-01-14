@@ -1,4 +1,5 @@
-cache_calendar.pickle
-token.pickle
+calendar_api/cache_calendar.pickle
+calendar_api/token.pickle
 __pycache__
-credentials.json
+calendar_api/credentials.json
+artic_api/ids_list.txt
