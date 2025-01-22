@@ -7,11 +7,6 @@ from e_paper.e_paper_display import display_text
 LOCK_FILE = "/tmp/my_script.lock"
 FLAGS_FILE_PATH = os.path.join(os.path.dirname(__file__), 'flags.json')
 
-# Check if the lock file exists
-if os.path.exists(LOCK_FILE):
-    print("Another instance of the script is running.")
-    sys.exit(1)
-
 # Create a lock file to prevent other instances from running
 with open(LOCK_FILE, 'w') as lock_file:
     lock_file.write("")

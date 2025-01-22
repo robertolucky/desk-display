@@ -5,8 +5,14 @@ This project is inspired by the desire to have a small, yet aesthetically pleasi
 For the integration with Google Calendar, we have repurposed functions from an existing project. 
 
 To ensure that the `check_and_display.py` script runs every 2 minutes, add the following line to your crontab:
-*/2 * * * * /usr/bin/python3 /home/roberto/desk-display/check_and_display.py >> /home/roberto/desk-display/routine.log 2>&1
-0 */48 * * * rm /home/roberto/desk-display/routine.logrm 
+
+`
+    @reboot /usr/bin/python3 /home/roberto/desk-display/startup.py
+    
+    */2 * * * * /usr/bin/python3 /home/roberto/desk-display/check_and_display.py >> /home/roberto/desk-display/routine.log 2>&
+    
+    10 */48 * * * rm /home/roberto/desk-display/routine.logrm 
+`
 
 ---
 
