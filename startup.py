@@ -1,9 +1,11 @@
 import os
 import sys
 import socket
+import json
 from e_paper.e_paper_display import display_text
 
 LOCK_FILE = "/tmp/my_script.lock"
+FLAGS_FILE_PATH = os.path.join(os.path.dirname(__file__), 'flags.json')
 
 # Check if the lock file exists
 if os.path.exists(LOCK_FILE):
@@ -31,5 +33,13 @@ message=f"The IP address is: {get_ip_address()}"
 print(message)
 if not display_text(message):
     display_text(message)
+
+# Reset the flags to a starting point
+with open(FLAGS_FILE_PATH, 'w') as file:
+    json.dump({
+    "image_downloaded": False,
+    "art_in_show": False,
+    "time_for_meeting": False
+    }, file, indent=4)
 # Remove the lock file when done
 os.remove(LOCK_FILE)
