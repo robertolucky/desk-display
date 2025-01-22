@@ -27,9 +27,9 @@ def get_ip_address():
         ip_address = "Unable to determine IP Address: " + str(e)
     return ip_address
 
-address=get_ip_address()
-print(f"The IP address of the Raspberry Pi is: {address}")
-if not display_text(address):
-    display_text(address)
+message=f"The IP address is: {get_ip_address()}"
+print(message)
+if not display_text(message):
+    display_text(message)
 # Remove the lock file when done
 os.remove(LOCK_FILE)
