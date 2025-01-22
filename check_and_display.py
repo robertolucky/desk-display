@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import random
 import pytz
@@ -10,6 +11,16 @@ from e_paper.e_paper_display import display_image
 from calendar_api import event_manager
 import logging
 
+LOCK_FILE = "/tmp/my_script.lock"
+
+# Check if the lock file exists
+if os.path.exists(LOCK_FILE):
+    print("Another instance of the script is running.")
+    sys.exit(1)
+
+# Create a lock file to prevent other instances from running
+with open(LOCK_FILE, 'w') as lock_file:
+    lock_file.write("")
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 art_image_path_jpg = os.path.join(dir_path, 'artic_api/art_image.jpg')
@@ -71,12 +82,12 @@ def download_image_if_needed():
 
 def display():
     if get_flag("art_in_show") and get_flag("time_for_meeting"):
-        display_image(calendar_path_png)
-        set_flag("art_in_show", False)
+        if display_image(calendar_path_png):
+            set_flag("art_in_show", False)
 
     elif (not get_flag("art_in_show")) and (not get_flag("time_for_meeting")):
-        display_image(art_image_path_bpm)
-        set_flag("art_in_show", True)
+        if display_image(random_image_bmp_path):
+            set_flag("art_in_show",True)
     else:
         logging.info("Nothing to display")
 
@@ -104,8 +115,8 @@ if __name__ == "__main__":
         random_image_bmp_path = os.path.join(dir_path, 'personal_photos/photo.bmp')
         convert_to_bmp(random_image_path, random_image_bmp_path,1)
         # Display the random image
-        display_image(random_image_bmp_path)
-        set_flag("art_in_show",True)
+        if display_image(random_image_bmp_path):
+            set_flag("art_in_show",True)
     
 
     if first_event:  # Ensure first_event is not None or empty
@@ -115,12 +126,14 @@ if __name__ == "__main__":
         current_time_brussels = datetime.now(timezone.utc).astimezone(BRUSSELS_TIMEZONE)
         # Calculate the time difference in minutes
         time_difference = (first_event - current_time_brussels).total_seconds() / 60.0
-        logging.info(f"Next event in {time_difference}")
+        logging.info(f"Next event is at {first_event} in {time_difference}")
 
-        # Check if the current time is within 10 minutes before or 5 minutes after the event
+        # Check if the current time is within 15 minutes before or 5 minutes after the event
         if -5 <= time_difference <= 15:
             set_flag("time_for_meeting", True)
         else:
             set_flag("time_for_meeting", False)
 
     display()
+    # Remove the lock file when done
+    os.remove(LOCK_FILE)

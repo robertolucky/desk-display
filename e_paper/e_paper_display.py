@@ -22,9 +22,11 @@ def display_image(image_file=None):
 
     logging.info("Goto Sleep...")
     epd.sleep()
+    return True
 
   except IOError as e:
     logging.info(e)
+    return False
 
 
 if __name__ == "__main__":

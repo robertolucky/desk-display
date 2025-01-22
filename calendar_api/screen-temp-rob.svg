@@ -13,7 +13,7 @@
       </g>
    </defs>
 
-   <text id="text3145" x="30" y="90" font-size="60px" style="font-weight:bold;font-size:60px;line-height:0%;font-family:sans-serif;fill:#000000;font-style:normal;font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;">
+   <text id="text3145" x="30" y="90" font-size="50px" style="font-weight:bold;font-size:50px;line-height:0%;font-family:sans-serif;fill:#000000;font-style:normal;font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;">
       <tspan sodipodi:role="line" id="tspan82">DAY_NOW</tspan>
    </text>
 
