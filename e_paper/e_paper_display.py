@@ -37,8 +37,11 @@ def display_text(text):
     font40 = ImageFont.truetype(os.path.join(os.path.realpath(__file__), 'Font.ttc'), 40)
     Himage = Image.new('RGB', (epd.width, epd.height), epd.WHITE)  # 255: clear the frame
     draw = ImageDraw.Draw(Himage)
-    draw.text((5, 20), text, font = font40, fill = epd.BLUE)
+    draw.text((5, 20), str(text), font = font40, fill = epd.BLUE)
+    logging.info("Displaying text")
     epd.display(epd.getbuffer(Himage))
+    logging.info("Goto Sleep...")
+
     time.sleep(3)
     return True
 
