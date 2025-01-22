@@ -86,7 +86,7 @@ def display():
             set_flag("art_in_show", False)
 
     elif (not get_flag("art_in_show")) and (not get_flag("time_for_meeting")):
-        if display_image(random_image_bmp_path):
+        if display_image(art_image_path_bpm):
             set_flag("art_in_show",True)
     else:
         logging.info("Nothing to display")
