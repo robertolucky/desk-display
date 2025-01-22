@@ -1,6 +1,7 @@
 import os
 import sys
 import socket
+from e_paper.e_paper_display import display_text
 
 LOCK_FILE = "/tmp/my_script.lock"
 
@@ -26,7 +27,9 @@ def get_ip_address():
         ip_address = "Unable to determine IP Address: " + str(e)
     return ip_address
 
-
-print(f"The IP address of the Raspberry Pi is: {get_ip_address()}")
+address=get_ip_address()
+print(f"The IP address of the Raspberry Pi is: {address}")
+if not display_text(address):
+    display_text(address)
 # Remove the lock file when done
 os.remove(LOCK_FILE)

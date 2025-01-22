@@ -12,7 +12,7 @@ To ensure that the `check_and_display.py` script runs every 2 minutes, add the f
 
 ## Original Project Information
 
-The foundation for the Google Calendar connection comes from the [waveshare-epaper-display](https://github.com/mendhak/waveshare-epaper-display) project. This project provides a comprehensive guide on setting up a Raspberry Pi Zero WH with a Waveshare ePaper 7.5 Inch HAT to display various pieces of information including date, time, weather, and calendar entries.
+The foundation for the Google Calendar connection comes from the [waveshare-epaper-display](https://github.com/mendhak/waveshare-epaper-display) project. This project provides a comprehensive guide on setting up a Raspberry Pi Zero WH with a Waveshare ePaper 7.5 Inch HAT to display various pieces of information including date, time, weather, and calendar entries. Also for the display driver I have used the [official waveshare repo](https://github.com/waveshareteam/e-Paper/tree/af4d8b49ccef5f8f5fb88e9a836b86bd3f0bbfe3)
 
 ### Acknowledgements
 
