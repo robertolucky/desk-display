@@ -18,10 +18,6 @@ if os.path.exists(LOCK_FILE):
     print("Another instance of the script is running.")
     sys.exit(1)
 
-# Create a lock file to prevent other instances from running
-with open(LOCK_FILE, 'w') as lock_file:
-    lock_file.write("")
-
 dir_path = os.path.dirname(__file__)
 art_image_path_jpg = os.path.join(dir_path, 'artic_api/art_image.jpg')
 art_image_path_bpm = os.path.join(dir_path, 'artic_api/art_image.bpm')
@@ -135,5 +131,3 @@ if __name__ == "__main__":
             set_flag("time_for_meeting", False)
 
     display()
-    # Remove the lock file when done
-    os.remove(LOCK_FILE)
