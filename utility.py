@@ -200,7 +200,7 @@ def get_formatted_date(dt, include_time=True):
 
 ## Roberto's code
 
-def convert_to_bmp(input_path, output_path, brightness_factor=1.5):
+def convert_to_bmp(input_path, output_path, brightness_factor=1.25):
     """
     This function takes any image, increases its brightness,
     and converts it to a BMP format compatible with the e-ink display.     

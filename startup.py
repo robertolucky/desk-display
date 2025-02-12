@@ -2,6 +2,7 @@ import os
 import sys
 import socket
 import json
+import time
 from e_paper.e_paper_display import display_text
 
 LOCK_FILE = "/tmp/my_script.lock"
@@ -11,7 +12,7 @@ FLAGS_FILE_PATH = os.path.join(os.path.dirname(__file__), 'flags.json')
 with open(LOCK_FILE, 'w') as lock_file:
     lock_file.write("")
 
-
+time.sleep(30)
 
 def get_ip_address():
     # Create a dummy socket to connect to an external server

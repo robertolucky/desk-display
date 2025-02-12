@@ -74,6 +74,7 @@ def download_image_if_needed():
     set_flag("image_downloaded", True)
     set_flag("art_in_show", False)
     event_manager.push_event(f"Art of the day - Title: {title}, artist: {artist}")
+    display()
     return True
 
 def display():
