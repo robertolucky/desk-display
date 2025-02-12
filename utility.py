@@ -200,23 +200,29 @@ def get_formatted_date(dt, include_time=True):
 
 ## Roberto's code
 
-def convert_to_bmp(input_path, output_path, brightness_factor=1.25):
+from PIL import Image, ImageEnhance
+
+def convert_to_bmp(input_path, output_path, brightness_factor=1.25, saturation_factor=1.5):
     """
-    This function takes any image, increases its brightness,
+    This function takes any image, increases its brightness and saturation,
     and converts it to a BMP format compatible with the e-ink display.     
     `brightness_factor` can be adjusted to control the brightness enhancement.
-
+    `saturation_factor` can be adjusted to control the color enhancement.
     """
     # Open the image
     img = Image.open(input_path)
-    
+
     # Enhance the brightness of the image
-    enhancer = ImageEnhance.Brightness(img)
-    img = enhancer.enhance(brightness_factor)  # Increase the brightness
-    
-    # Create a new black background image
+    brightness_enhancer = ImageEnhance.Brightness(img)
+    img = brightness_enhancer.enhance(brightness_factor)  # Increase the brightness
+
+    # Enhance the saturation of the image
+    saturation_enhancer = ImageEnhance.Color(img)
+    img = saturation_enhancer.enhance(saturation_factor)  # Increase the saturation
+
+    # Create a new white background image
     background = Image.new('RGB', (800, 480), 'white')
-    
+
     # Calculate new size maintaining aspect ratio
     target_width = 800
     target_height = 480
@@ -225,17 +231,17 @@ def convert_to_bmp(input_path, output_path, brightness_factor=1.25):
     new_width = int(original_width * ratio)
     new_height = int(original_height * ratio)
     print(f"Resizing image to {new_width}x{new_height}")
-    
+
     # Resize image maintaining aspect ratio
     img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-    
+
     # Calculate position to center the image
     x = (800 - new_width) // 2
     y = (480 - new_height) // 2
-    
-    # Paste the resized image onto the black background
+
+    # Paste the resized image onto the white background
     background.paste(img, (x, y))
-    
+
     # Save the image in BMP format
     background.save(output_path, format='BMP')
 
