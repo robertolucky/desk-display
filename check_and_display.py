@@ -3,6 +3,7 @@ import sys
 import json
 import random
 import pytz
+import time
 
 from datetime import datetime, timedelta, timezone
 from utility import convert_to_bmp, convert_svg_to_png
@@ -74,6 +75,7 @@ def download_image_if_needed():
     set_flag("image_downloaded", True)
     set_flag("art_in_show", False)
     event_manager.push_event(f"Art of the day - Title: {title}, artist: {artist}")
+    time.sleep(10)
     display()
     return True
 
