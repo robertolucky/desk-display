@@ -40,50 +40,23 @@ def fetch_all_pages(base_url, params):
     
     return all_data
 
-# Fetch all paintings
-params_paintings = {
-    'query': {  
+
+# Fetch only landscape paintings (classification_title: painting, q: landscape)
+params_landscape_paintings = {
+    'q': 'landscape',
+    'query': {
         'term': {
-            'classification_title': "painting"
+            'classification_title': 'painting'
         }
     }
 }
-print("Fetching all paintings...")
-paintings_data = fetch_all_pages(api_url, params_paintings)
+print("Fetching only landscape paintings (IDs only)...")
+landscape_paintings = fetch_all_pages(api_url, params_landscape_paintings)
 
-# Fetch all impressionism artworks
-params_impressionism = {
-    'q': "impressionism"
-}
-print("\nFetching all impressionism artworks...")
-impressionism_data = fetch_all_pages(api_url, params_impressionism)
+# Extract only the IDs
+landscape_painting_ids = [artwork['id'] for artwork in landscape_paintings]
 
-# Create complete datasets
-data1 = {'data': paintings_data}
-data2 = {'data': impressionism_data}
-
-# Save complete datasets
-with open('artwork_data.json', 'w') as f:
-    json.dump(data1, f, indent=4)
-print(f"\nSaved {len(paintings_data)} paintings to artwork_data.json")
-
-with open('impressionism_data.json', 'w') as f:
-    json.dump(data2, f, indent=4)
-print(f"Saved {len(impressionism_data)} impressionism artworks to impressionism_data.json")
-
-paintings_ids = set(artwork['id'] for artwork in data1['data'])
-impressionism_ids = set(artwork['id'] for artwork in data2['data'])
-
-# Find intersection
-common_ids = paintings_ids.intersection(impressionism_ids)
-
-# Create a list of artworks that appear in both searches
-intersection_data = {
-    'data': [artwork for artwork in data1['data'] if artwork['id'] in common_ids]
-}
-
-# Save intersection data to JSON file
-with open('intersection_data.json', 'w') as f:
-    json.dump(intersection_data, f, indent=4)
-print(f"Found {len(common_ids)} artworks that are both paintings and impressionist")
-print(f"Saved intersection data to intersection_data.json")
+# Save IDs to JSON
+with open('landscape_painting_ids.json', 'w') as f:
+    json.dump({'ids': landscape_painting_ids}, f, indent=4)
+print(f"Saved {len(landscape_painting_ids)} landscape painting IDs to landscape_painting_ids.json")
