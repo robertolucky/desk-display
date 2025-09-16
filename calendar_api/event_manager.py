@@ -91,7 +91,7 @@ def push_event(message="ignore this event"):
         'useDefault': False,
         'overrides': []
     }
-    provider.create_event(message, start_time, end_time)
+    provider.create_event(message, start_time, end_time, reminders_override)
 
 
 def update_and_return():
