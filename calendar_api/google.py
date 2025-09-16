@@ -100,7 +100,7 @@ class GoogleCalendar(BaseCalendarProvider):
         return calendar_events
 
 
-    def create_event(self, event_name: str, start_time: datetime.datetime, end_time: datetime.datetime):
+    def create_event(self, event_name: str, start_time: datetime.datetime, end_time: datetime.datetime, reminders: dict = None):
         service = build('calendar', 'v3', credentials=self.get_google_credentials(), cache_discovery=False)
 
         # Determine timezone to be used
@@ -123,7 +123,9 @@ class GoogleCalendar(BaseCalendarProvider):
                 'timeZone': time_zone,
             },
         }
-
+        # Add the reminders object to the event body if it's provided
+        if reminders:
+            event['reminders'] = reminders
         event = service.events().insert(calendarId=self.google_calendar_id, body=event).execute()
         print(f"Event created: {event.get('htmlLink')}")
     
