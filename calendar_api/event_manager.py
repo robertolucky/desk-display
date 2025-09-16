@@ -87,6 +87,10 @@ def push_event(message="ignore this event"):
     start_time = datetime.datetime.combine(datetime.date.today(), datetime.time(fake_event_h, 0))
     end_time = datetime.datetime.combine(datetime.date.today(), datetime.time(fake_event_h, 15))
     provider=init_calendar()
+    reminders_override = {
+        'useDefault': False,
+        'overrides': []
+    }
     provider.create_event(message, start_time, end_time)
 
 
