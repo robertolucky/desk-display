@@ -12,7 +12,6 @@ configure_logging()
 
 # note: increasing this will require updates to the SVG template to accommodate more events
 max_event_results =  6
-google_calendar_id = "robertolacom.rlc@gmail.com"
 google_calendar_id = "roberto.lacommare@pickit3d.com"
 ttl = 300
 fake_event_h=7
@@ -74,19 +73,35 @@ def get_datetime_formatted(event_start, event_end, is_all_day_event, start_only=
     return day
 
 def init_calendar():
-    today_start_time = datetime.datetime.utcnow()+ datetime.timedelta(minutes=40)
+    # timeMin is "now": Google filters on event END time, so the old
+    # "+40 minutes" offset silently hid any meeting shorter than ~40 min
+    # and made ongoing meetings vanish early. The 7am art events are
+    # already filtered out by name in update_and_return().
+    today_start_time = datetime.datetime.now(datetime.timezone.utc)
 
-    oneweeklater_iso = (datetime.datetime.now()
+    oneweeklater_iso = (datetime.datetime.now(datetime.timezone.utc)
                         + datetime.timedelta(days=7))
 
     logging.info("Fetching Google Calendar Events")
     provider = GoogleCalendar(google_calendar_id, max_event_results, today_start_time, oneweeklater_iso)
     return provider
 
-def push_event(message="ignore this event"):
+def push_event(message="ignore this event", dedupe_prefix="Art of the day"):
     start_time = datetime.datetime.combine(datetime.date.today(), datetime.time(fake_event_h, 0))
     end_time = datetime.datetime.combine(datetime.date.today(), datetime.time(fake_event_h, 15))
-    provider=init_calendar()
+    provider = init_calendar()
+
+    # Deduplicate: never create a second event with the same prefix today.
+    # This is the server-side safety net against duplicate "Art of the day"
+    # events, regardless of what local flags/locks do.
+    try:
+        if provider.count_events_today(dedupe_prefix) > 0:
+            logging.info(f"An event starting with '{dedupe_prefix}' already exists today, skipping creation")
+            return
+    except Exception as e:
+        logging.error(f"Dedupe check failed, skipping event creation to be safe: {e}")
+        return
+
     reminders_override = {
         'useDefault': False,
         'overrides': []
