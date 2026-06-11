@@ -3,14 +3,18 @@ import sys
 import socket
 import json
 import time
+import fcntl
 from e_paper.e_paper_display import display_text
 
-LOCK_FILE = "/tmp/my_script.lock"
+LOCK_FILE = "/tmp/desk_display.lock"
 FLAGS_FILE_PATH = os.path.join(os.path.dirname(__file__), 'flags.json')
 
-# Create a lock file to prevent other instances from running
-with open(LOCK_FILE, 'w') as lock_file:
-    lock_file.write("")
+# Hold the same flock as check_and_display.py while starting up.
+# flock is released automatically when this process exits (even on crash),
+# so it can never permanently block the cron script like the old
+# "create a file and hope we delete it" approach could.
+_lock_fd = open(LOCK_FILE, 'w')
+fcntl.flock(_lock_fd, fcntl.LOCK_EX)
 
 time.sleep(30)
 
@@ -37,5 +41,4 @@ with open(FLAGS_FILE_PATH, 'w') as file:
     "art_in_show": False,
     "time_for_meeting": False
     }, file, indent=4)
-# Remove the lock file when done
-os.remove(LOCK_FILE)
+# flock released automatically on exit
