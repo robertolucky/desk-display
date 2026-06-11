@@ -9,11 +9,8 @@ Functions from an existing project have been tweaked for an easy connection with
 To ensure that the `check_and_display.py` script runs every 2 minutes, add the following line to your crontab:
 
 `
-*/2 * * * * /usr/bin/python3 /home/roberto/desk-display/check_and_display.py >> /home/roberto/desk-display/routine.log 2>&
-`
-
-`
-    10 */48 * * * rm /home/roberto/desk-display/routine.logrm 
+*/2 * * * * /usr/bin/python3 /home/roberto/desk-display/check_and_display.py >> /home/roberto/desk-display/routine.log 2>&1
+0 4 * * 1 truncate -s 0 /home/roberto/desk-display/routine.log
 `
 
 And this in the sudo crontab:
