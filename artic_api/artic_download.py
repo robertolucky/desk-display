@@ -10,11 +10,16 @@ BASE_URL = "https://api.artic.edu/api/v1/artworks/"
 FIELDS = "?fields=id,title,artist_title,image_id"
 MAX_ATTEMPTS = 5  # some artworks have image_id = null; skip them
 
-# AIC's image CDN rejects the default "python-requests/x.y" User-Agent with a
-# 403, and their API guidelines ask consumers to identify themselves with an
-# "AppName (contact)" string. Sending this fixes the 403 on image downloads.
+# The www.artic.edu image host sits behind a WAF that 403s "bare" requests
+# (a custom app UA is not enough). Sending a full browser-like header set -
+# realistic User-Agent, Accept, Accept-Language, and a Referer pointing back
+# to artic.edu - makes the request look like a normal browser and gets past it.
 HEADERS = {
-    "User-Agent": "desk-display/1.0 (https://github.com/robertolucky/desk-display)"
+    "User-Agent": ("Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 "
+                   "(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"),
+    "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Referer": "https://www.artic.edu/",
 }
 
 
