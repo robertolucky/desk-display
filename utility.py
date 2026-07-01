@@ -267,13 +267,43 @@ def _draw_caption(canvas, title, artist):
     return canvas
 
 
-def convert_to_bmp(input_path, output_path, brightness_factor=1.15,
-                   saturation_factor=1.5, mode="art", title="", artist=""):
+PANEL_AR = PANEL_W / PANEL_H  # 1.667
+
+
+def _fit_to_panel(img, crop_tolerance=0.20, top_bias=0.30):
+    """Place `img` onto the 800x480 panel.
+
+    - If the aspect ratio is within `crop_tolerance` of the panel's, crop to
+      fill (no white bars). For portrait-ish images the crop is biased toward
+      the top (top_bias) so faces/heads near the top aren't cut off.
+    - If the aspect ratio differs strongly (tall portraits, panoramas), the
+      whole image is letterboxed on a white background so nothing is lost.
+    """
+    ar = img.width / img.height
+    mismatch = abs(ar - PANEL_AR) / PANEL_AR
+    if mismatch <= crop_tolerance:
+        centering = (0.5, top_bias if ar < PANEL_AR else 0.5)
+        return ImageOps.fit(img, (PANEL_W, PANEL_H),
+                            method=Image.Resampling.LANCZOS, centering=centering)
+    canvas = Image.new("RGB", (PANEL_W, PANEL_H), "white")
+    ratio = min(PANEL_W / img.width, PANEL_H / img.height)
+    new_size = (int(img.width * ratio), int(img.height * ratio))
+    resized = img.resize(new_size, Image.Resampling.LANCZOS)
+    canvas.paste(resized, ((PANEL_W - new_size[0]) // 2, (PANEL_H - new_size[1]) // 2))
+    return canvas
+
+
+def convert_to_bmp(input_path, output_path, brightness_factor=1.05,
+                   saturation_factor=1.15, mode="art", title="", artist=""):
     """Prepare an image for the 7-color ACeP e-paper panel.
 
-    mode="art"       -> smart-crop to fill panel + caption strip + dithering
-    mode="photo" / 1 -> smart-crop to fill panel, no caption + dithering
-    mode="letterbox" -> legacy: fit inside a white background + dithering
+    mode="art"       -> aspect-aware fit + caption strip + dithering
+    mode="photo" / 1 -> aspect-aware fit, no caption + dithering
+    mode="letterbox" -> always letterbox on white + dithering
+    mode="crop"      -> always crop to fill (top-biased) + dithering
+
+    "art"/"photo" crop only when the aspect ratio is close to the panel's,
+    otherwise they letterbox so portraits aren't decapitated.
 
     An int in the `mode` position is treated as photo mode, so old calls like
     convert_to_bmp(a, b, 1) keep working.
@@ -282,28 +312,25 @@ def convert_to_bmp(input_path, output_path, brightness_factor=1.15,
         mode = "photo"
 
     img = Image.open(input_path).convert("RGB")
+    # Gentle enhancement: pushing saturation hard before dithering forces pixels
+    # to the palette extremes and makes the 7-color output look garish/noisy.
     img = ImageEnhance.Brightness(img).enhance(brightness_factor)
     img = ImageEnhance.Color(img).enhance(saturation_factor)
 
     if mode == "letterbox":
-        canvas = Image.new("RGB", (PANEL_W, PANEL_H), "white")
-        ratio = min(PANEL_W / img.width, PANEL_H / img.height)
-        new_size = (int(img.width * ratio), int(img.height * ratio))
-        img = img.resize(new_size, Image.Resampling.LANCZOS)
-        canvas.paste(img, ((PANEL_W - new_size[0]) // 2, (PANEL_H - new_size[1]) // 2))
+        canvas = _fit_to_panel(img, crop_tolerance=0.0)      # always letterbox
+    elif mode == "crop":
+        canvas = _fit_to_panel(img, crop_tolerance=1.0)      # always crop
     else:
-        # Smart crop: fill the entire panel, centered, no white bars.
-        canvas = ImageOps.fit(img, (PANEL_W, PANEL_H),
-                              method=Image.Resampling.LANCZOS,
-                              centering=(0.5, 0.5))
+        canvas = _fit_to_panel(img)                          # decide per aspect
 
     if mode == "art":
         composited = _draw_caption(canvas, title, artist)
         if composited is not None:
             canvas = composited.convert("RGB")
 
-    # Floyd-Steinberg dithering against the panel's exact palette. This is the
-    # big visual win: smooth gradients stop posterizing into flat color bands.
+    # Floyd-Steinberg dithering against the panel's exact palette, so smooth
+    # gradients don't posterize into flat color bands.
     dithered = canvas.quantize(palette=_panel_palette_image(),
                                dither=Image.Dither.FLOYDSTEINBERG).convert("RGB")
     dithered.save(output_path, format="BMP")
