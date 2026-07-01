@@ -10,6 +10,13 @@ BASE_URL = "https://api.artic.edu/api/v1/artworks/"
 FIELDS = "?fields=id,title,artist_title,image_id"
 MAX_ATTEMPTS = 5  # some artworks have image_id = null; skip them
 
+# AIC's image CDN rejects the default "python-requests/x.y" User-Agent with a
+# 403, and their API guidelines ask consumers to identify themselves with an
+# "AppName (contact)" string. Sending this fixes the 403 on image downloads.
+HEADERS = {
+    "User-Agent": "desk-display/1.0 (https://github.com/robertolucky/desk-display)"
+}
+
 
 def _rotate_ids():
     """Pop the first id from ids_list.txt, append it to the end, return it."""
@@ -38,7 +45,8 @@ def download_image():
             return None
 
         try:
-            response = requests.get(f"{BASE_URL}{image_id}{FIELDS}", timeout=30)
+            response = requests.get(f"{BASE_URL}{image_id}{FIELDS}",
+                                    headers=HEADERS, timeout=30)
             response.raise_for_status()
             artwork = response.json()
         except (requests.RequestException, ValueError) as e:
@@ -57,7 +65,8 @@ def download_image():
 
         try:
             img_response = requests.get(
-                f"{iiif_url}/{iiif_image_id}/full/843,/0/default.jpg", timeout=60)
+                f"{iiif_url}/{iiif_image_id}/full/843,/0/default.jpg",
+                headers=HEADERS, timeout=60)
             img_response.raise_for_status()
         except requests.RequestException as e:
             logging.error(f"Image download failed for artwork {image_id}: {e}")
