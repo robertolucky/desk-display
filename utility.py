@@ -293,8 +293,8 @@ def _fit_to_panel(img, crop_tolerance=0.20, top_bias=0.30):
     return canvas
 
 
-def convert_to_bmp(input_path, output_path, brightness_factor=1.05,
-                   saturation_factor=1.15, mode="art", title="", artist=""):
+def convert_to_bmp(input_path, output_path, brightness_factor=1.15,
+                   saturation_factor=1.50, mode="art", title="", artist=""):
     """Prepare an image for the 7-color ACeP e-paper panel.
 
     mode="art"       -> aspect-aware fit + caption strip + dithering
