@@ -14,12 +14,29 @@ from calendar_api import event_manager
 
 LOCK_FILE = "/tmp/desk_display.lock"
 
-# Acquire an OS-level lock. Unlike the old "check if file exists" approach,
-# flock is atomic AND is released automatically when the process dies,
-# so a crash can never leave a stale lock behind, and two overlapping
-# cron runs can never execute concurrently (the cause of the duplicate
-# "Art of the day" events).
-_lock_fd = open(LOCK_FILE, "w")
+
+def acquire_lock(path):
+    """Open a lock file in a way that works even if it was created by another
+    user (e.g. startup.py running as root at boot vs. this script running as
+    the normal user via cron). Opening a root-owned 0644 file with 'w' fails
+    with PermissionError; flock works on a read-only handle on Linux, so we
+    fall back to that."""
+    try:
+        fd = os.open(path, os.O_CREAT | os.O_RDWR, 0o666)
+        try:
+            os.chmod(path, 0o666)  # let any user lock it, whoever created it
+        except PermissionError:
+            pass
+    except PermissionError:
+        fd = os.open(path, os.O_RDONLY)
+    return fd
+
+
+# Acquire an OS-level lock. flock is atomic AND released automatically when the
+# process dies, so a crash can never leave a stale lock behind, and two
+# overlapping cron runs can never execute concurrently (the cause of the
+# duplicate "Art of the day" events).
+_lock_fd = acquire_lock(LOCK_FILE)
 try:
     fcntl.flock(_lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
 except BlockingIOError:
@@ -83,7 +100,8 @@ def download_image_if_needed():
         return False
 
     title, artist = result
-    convert_to_bmp(art_image_path_jpg, art_image_path_bmp)
+    convert_to_bmp(art_image_path_jpg, art_image_path_bmp,
+                   mode="art", title=title, artist=artist)
     set_flag("image_downloaded", True)
     set_flag("art_in_show", False)
     # push_event now deduplicates server-side, so even if something goes
