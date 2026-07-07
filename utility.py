@@ -200,51 +200,142 @@ def get_formatted_date(dt, include_time=True):
 
 ## Roberto's code
 
-from PIL import Image, ImageEnhance
+from PIL import Image, ImageDraw, ImageFont, ImageEnhance, ImageOps
 
-def convert_to_bmp(input_path, output_path, brightness_factor=1.25, saturation_factor=1.5):
+# The EXACT 7-color palette the panel uses (see e_paper/epd7in3f.py getbuffer).
+# Dithering against this same palette here means what we render is exactly what
+# the panel shows - the driver's own quantize pass becomes a no-op.
+PANEL_PALETTE = (
+    0, 0, 0,        # black
+    255, 255, 255,  # white
+    0, 255, 0,      # green
+    0, 0, 255,      # blue
+    255, 0, 0,      # red
+    255, 255, 0,    # yellow
+    255, 128, 0,    # orange
+)
+PANEL_W, PANEL_H = 800, 480
+
+
+def _panel_palette_image():
+    pal = Image.new("P", (1, 1))
+    pal.putpalette(PANEL_PALETTE + (0, 0, 0) * 249)
+    return pal
+
+
+def _load_caption_font(size):
+    for path in (
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        os.path.join(os.path.dirname(__file__), "e_paper", "Font.ttc"),
+    ):
+        try:
+            return ImageFont.truetype(path, size)
+        except OSError:
+            continue
+    return ImageFont.load_default()
+
+
+def _draw_caption(canvas, title, artist):
+    """Draw a translucent strip along the bottom with the artwork title/artist.
+    Returns an RGBA canvas with the caption composited on, or None if nothing
+    to draw."""
+    title = (title or "").strip()
+    artist = (artist or "").strip()
+    if not title and not artist:
+        return None
+    text = title if not artist else "{}  -  {}".format(title, artist)
+
+    draw = ImageDraw.Draw(canvas)
+    font_size = 22
+    font = _load_caption_font(font_size)
+    while font_size > 12 and draw.textlength(text, font=font) > PANEL_W - 24:
+        font_size -= 2
+        font = _load_caption_font(font_size)
+    if draw.textlength(text, font=font) > PANEL_W - 24:
+        while text and draw.textlength(text + "\u2026", font=font) > PANEL_W - 24:
+            text = text[:-1]
+        text += "\u2026"
+
+    bbox = draw.textbbox((0, 0), text, font=font)
+    strip_h = (bbox[3] - bbox[1]) + 16
+    canvas = canvas.convert("RGBA")
+    strip = Image.new("RGBA", (PANEL_W, strip_h), (0, 0, 0, 180))
+    canvas.alpha_composite(strip, (0, PANEL_H - strip_h))
+    draw = ImageDraw.Draw(canvas)
+    draw.text((12, PANEL_H - strip_h + 8 - bbox[1]), text, font=font,
+              fill=(255, 255, 255, 255))
+    return canvas
+
+
+PANEL_AR = PANEL_W / PANEL_H  # 1.667
+
+
+def _fit_to_panel(img, crop_tolerance=0.20, top_bias=0.30):
+    """Place `img` onto the 800x480 panel.
+
+    - If the aspect ratio is within `crop_tolerance` of the panel's, crop to
+      fill (no white bars). For portrait-ish images the crop is biased toward
+      the top (top_bias) so faces/heads near the top aren't cut off.
+    - If the aspect ratio differs strongly (tall portraits, panoramas), the
+      whole image is letterboxed on a white background so nothing is lost.
     """
-    This function takes any image, increases its brightness and saturation,
-    and converts it to a BMP format compatible with the e-ink display.     
-    `brightness_factor` can be adjusted to control the brightness enhancement.
-    `saturation_factor` can be adjusted to control the color enhancement.
+    ar = img.width / img.height
+    mismatch = abs(ar - PANEL_AR) / PANEL_AR
+    if mismatch <= crop_tolerance:
+        centering = (0.5, top_bias if ar < PANEL_AR else 0.5)
+        return ImageOps.fit(img, (PANEL_W, PANEL_H),
+                            method=Image.Resampling.LANCZOS, centering=centering)
+    canvas = Image.new("RGB", (PANEL_W, PANEL_H), "white")
+    ratio = min(PANEL_W / img.width, PANEL_H / img.height)
+    new_size = (int(img.width * ratio), int(img.height * ratio))
+    resized = img.resize(new_size, Image.Resampling.LANCZOS)
+    canvas.paste(resized, ((PANEL_W - new_size[0]) // 2, (PANEL_H - new_size[1]) // 2))
+    return canvas
+
+
+def convert_to_bmp(input_path, output_path, brightness_factor=1.15,
+                   saturation_factor=1.50, mode="art", title="", artist=""):
+    """Prepare an image for the 7-color ACeP e-paper panel.
+
+    mode="art"       -> aspect-aware fit + caption strip + dithering
+    mode="photo" / 1 -> aspect-aware fit, no caption + dithering
+    mode="letterbox" -> always letterbox on white + dithering
+    mode="crop"      -> always crop to fill (top-biased) + dithering
+
+    "art"/"photo" crop only when the aspect ratio is close to the panel's,
+    otherwise they letterbox so portraits aren't decapitated.
+
+    An int in the `mode` position is treated as photo mode, so old calls like
+    convert_to_bmp(a, b, 1) keep working.
     """
-    # Open the image
-    img = Image.open(input_path)
+    if isinstance(mode, int):
+        mode = "photo"
 
-    # Enhance the brightness of the image
-    brightness_enhancer = ImageEnhance.Brightness(img)
-    img = brightness_enhancer.enhance(brightness_factor)  # Increase the brightness
+    img = Image.open(input_path).convert("RGB")
+    # Gentle enhancement: pushing saturation hard before dithering forces pixels
+    # to the palette extremes and makes the 7-color output look garish/noisy.
+    img = ImageEnhance.Brightness(img).enhance(brightness_factor)
+    img = ImageEnhance.Color(img).enhance(saturation_factor)
 
-    # Enhance the saturation of the image
-    saturation_enhancer = ImageEnhance.Color(img)
-    img = saturation_enhancer.enhance(saturation_factor)  # Increase the saturation
+    if mode == "letterbox":
+        canvas = _fit_to_panel(img, crop_tolerance=0.0)      # always letterbox
+    elif mode == "crop":
+        canvas = _fit_to_panel(img, crop_tolerance=1.0)      # always crop
+    else:
+        canvas = _fit_to_panel(img)                          # decide per aspect
 
-    # Create a new white background image
-    background = Image.new('RGB', (800, 480), 'white')
+    if mode == "art":
+        composited = _draw_caption(canvas, title, artist)
+        if composited is not None:
+            canvas = composited.convert("RGB")
 
-    # Calculate new size maintaining aspect ratio
-    target_width = 800
-    target_height = 480
-    original_width, original_height = img.size
-    ratio = min(target_width/original_width, target_height/original_height)
-    new_width = int(original_width * ratio)
-    new_height = int(original_height * ratio)
-    print(f"Resizing image to {new_width}x{new_height}")
+    # Floyd-Steinberg dithering against the panel's exact palette, so smooth
+    # gradients don't posterize into flat color bands.
+    dithered = canvas.quantize(palette=_panel_palette_image(),
+                               dither=Image.Dither.FLOYDSTEINBERG).convert("RGB")
+    dithered.save(output_path, format="BMP")
 
-    # Resize image maintaining aspect ratio
-    img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-
-    # Calculate position to center the image
-    x = (800 - new_width) // 2
-    y = (480 - new_height) // 2
-
-    # Paste the resized image onto the white background
-    background.paste(img, (x, y))
-
-    # Save the image in BMP format
-    background.save(output_path, format='BMP')
 
 def convert_svg_to_png(svg_file_path, png_file_path):
-    # Convert SVG to BMP using cairosvg
+    # Convert SVG to PNG using cairosvg
     cairosvg.svg2png(url=svg_file_path, write_to=png_file_path, output_width=800, output_height=480)

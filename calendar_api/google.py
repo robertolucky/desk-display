@@ -55,13 +55,13 @@ class GoogleCalendar(BaseCalendarProvider):
 
         events_result = None
 
-        if is_stale(os.getcwd() + "/" + google_calendar_pickle, ttl):
+        if is_stale(google_calendar_pickle, ttl):
             logging.debug("Pickle is stale, calling the Calendar API")
 
             # Call the Calendar API
             events_result = service.events().list(
                 calendarId=self.google_calendar_id,
-                timeMin=self.from_date.isoformat() + 'Z',
+                timeMin=self.from_date.isoformat(),
                 timeZone=google_calendar_timezone,
                 maxResults=self.max_event_results,
                 singleEvents=True,
@@ -106,11 +106,15 @@ class GoogleCalendar(BaseCalendarProvider):
         # Determine timezone to be used
         time_zone = google_calendar_timezone or 'UTC'  # Default to UTC if no timezone is set
 
-        # Ensure start_time and end_time are aware datetime objects
+        # Ensure start_time and end_time are aware datetime objects.
+        # NOTE: never use .replace(tzinfo=pytz.timezone(...)) - pytz attaches
+        # the historical LMT offset (+00:18 for Brussels), which shifted every
+        # created event by ~1h42. localize() applies the correct CET/CEST offset.
+        tz = pytz.timezone(time_zone)
         if start_time.tzinfo is None:
-            start_time = start_time.replace(tzinfo=pytz.timezone(time_zone))
+            start_time = tz.localize(start_time)
         if end_time.tzinfo is None:
-            end_time = end_time.replace(tzinfo=pytz.timezone(time_zone))
+            end_time = tz.localize(end_time)
 
         event = {
             'summary': event_name,
@@ -129,6 +133,26 @@ class GoogleCalendar(BaseCalendarProvider):
         event = service.events().insert(calendarId=self.google_calendar_id, body=event).execute()
         print(f"Event created: {event.get('htmlLink')}")
     
+    def count_events_today(self, summary_prefix: str) -> int:
+        """Count events on today's calendar whose summary starts with `summary_prefix`.
+
+        Queries the API directly (no cache) so the result is authoritative.
+        Used to deduplicate generated events like "Art of the day".
+        """
+        service = build('calendar', 'v3', credentials=self.get_google_credentials(), cache_discovery=False)
+        tz = pytz.timezone(google_calendar_timezone)
+        day_start = tz.localize(datetime.datetime.combine(datetime.date.today(), datetime.time.min))
+        day_end = day_start + datetime.timedelta(days=1)
+        events_result = service.events().list(
+            calendarId=self.google_calendar_id,
+            timeMin=day_start.isoformat(),
+            timeMax=day_end.isoformat(),
+            singleEvents=True,
+            maxResults=250,
+            orderBy='startTime').execute()
+        return sum(1 for e in events_result.get('items', [])
+                   if e.get('summary', '').startswith(summary_prefix))
+
     def delete_event(self, event_id: str):
         service = build('calendar', 'v3', credentials=self.get_google_credentials(), cache_discovery=False)
         try:
@@ -152,6 +176,11 @@ class GoogleCalendar(BaseCalendarProvider):
 
             if not events_to_delete:
                 logging.info(f"No event with summary starting '{summary_prefix}' found.")
+            else:
+                # Invalidate the local cache so deleted events can't be
+                # re-read from it and re-trigger control codes.
+                if os.path.exists(google_calendar_pickle):
+                    os.remove(google_calendar_pickle)
         except Exception as e:
             logging.error(f"An error occurred while trying to delete the event: {e}")
             raise
